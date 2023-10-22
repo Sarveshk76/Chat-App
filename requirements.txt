@@ -1,0 +1,5 @@
+Django==4.0.0
+channels==3.0.4
+redis
+channels-redis
+Pillow
