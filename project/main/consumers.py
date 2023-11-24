@@ -31,7 +31,7 @@ class ChatRoomConsumer(AsyncJsonWebsocketConsumer):
         )
 
         await self.accept()
-        await self.set_status()
+        await self.set_status_online()
 
 
     async def receive(self, text_data):
@@ -62,21 +62,18 @@ class ChatRoomConsumer(AsyncJsonWebsocketConsumer):
 
     # Function to update online status
     @database_sync_to_async
-    def set_status(self):
-        user = User.objects.get(id=self.my_id)
-        if user.is_online:
-             User.objects.filter(id=self.my_id).update(is_online=False)
-             User.objects.filter(id=self.other_user_id).update(is_online=False)
-        else:
-             User.objects.filter(id=self.my_id).update(is_online=True)
-             User.objects.filter(id=self.other_user_id).update(is_online=True)
-
+    def set_status_online(self):
+        User.objects.filter(id=self.my_id).update(is_online=True)
+    
+    @database_sync_to_async
+    def set_status_offline(self):
+        User.objects.filter(id=self.my_id).update(is_online=False)
     async def disconnect(self, code):
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name,
         )
-        await self.set_status()
+        await self.set_status_offline()
 
         print("Disconnected!!")
 
